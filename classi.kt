@@ -8,7 +8,7 @@ fun main() {
     println("${pg2.nomeCognome} ha ${pg2.eta} anni")
     println("${pg3.nomeCognome} ha ${pg3.eta} anni")
 }
-
+ 
 // constructor primario
 class Classe1(val nome: String, var eta: Int) {  
 }
