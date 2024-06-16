@@ -6,7 +6,7 @@ fun main() {
     giulia.age = 35
     println("Maria dice di avere ${maria.age} anni. Giulia dice di averne ${giulia.age}.")
 }
-
+ 
 class Girl {
     var age: Int = 0
     get() = field
