@@ -1,22 +1,31 @@
 // l'eredita' permette di creare una nuova classe derivata da una classe base
 // la classe derivata eredita tutte le caratteristiche dalla classe base e puo' avere caratteristiche addizionali tutte sue
+// le classi finali non possono avere sottoclassi. con 'open' permetto di derivare nuove classi
 
 // classe base
 open class Pirate {
     fun walkThePlank() {
-        println("Walking the plank!") }
+        println("Walking the plank!")
+    }
     fun drinkRum() {
-        println("Drinking rum!") }
+        println("Drinking rum!")
+    }
     fun shoutArrr() {
-        println("Shouting Arrr!") }}
+        println("Shouting Arrr!")
+    }
+}
 
 // classi derivate
 class Captain : Pirate() {
     fun giveOrders() {
-        println("Giving orders to the crew!") }}
+        println("Giving orders to the crew!")
+    }
+}
 class SwordsMan : Pirate() {
     fun duel() {
-        println("Engaging in a sword duel!") }}
+        println("Engaging in a sword duel!")
+    }
+}
 
 fun main() {
     val pirate = Pirate()
@@ -27,4 +36,5 @@ fun main() {
     captain.walkThePlank()
     pirate.drinkRum()
     captain.giveOrders()
-    swordsman.duel() }
+    swordsman.duel()
+}
