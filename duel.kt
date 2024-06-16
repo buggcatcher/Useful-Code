@@ -14,7 +14,7 @@ fun main() {
     
     duel(pg1, mossaPg1, pg2, mossaPg2)
 }
-
+ 
 class Personaggio(var nome: String, var level: Int, var mossa: String)
 
 class Mossa {
