@@ -1,13 +1,11 @@
 fun main() {
     var x = 1
 
-    while (x <= 5) {
+    while (x <= 3) {
         when (x) {
-            1 -> println("x è uguale a 1")
-            2 -> println("x è uguale a 2")
-            3 -> println("x è uguale a 3")
-            4 -> println("x è uguale a 4")
-            5 -> println("x è uguale a 5")
+            1 -> println("queso e' un ciclo")
+            2 -> println("while")
+            3 -> println()
         }
         x++
     }
@@ -15,22 +13,18 @@ fun main() {
     var y = 1
     do {
         when (y) {
-            1 -> println("y è uguale a 1")
-            2 -> println("y è uguale a 2")
-            3 -> println("y è uguale a 3")
-            4 -> println("y è uguale a 4")
-            5 -> println("y è uguale a 5")
+            1 -> println("queso e' un ciclo")
+            2 -> println("do-when")
+            3 -> println()
         }
         y++
-    } while (y <= 5)
+    } while (y <= 3)
 
-    for (z in 1..5) {
+    for (z in 1..3) {
         when (z) {
-            1 -> println("z è uguale a 1")
-            2 -> println("z è uguale a 2")
-            3 -> println("z è uguale a 3")
-            4 -> println("z è uguale a 4")
-            5 -> println("z è uguale a 5")
+            1 -> println("queso e' un ciclo")
+            2 -> println("for")
+            3 -> println()
         }
     }
 }
