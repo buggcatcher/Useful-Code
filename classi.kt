@@ -3,10 +3,12 @@ fun main() {
     val pg1 = Classe1("marko", 26)
     val pg2 = Classe2("babbo natale", 42)
     val pg3 = Classe3("gesu cristo", 100)
+    val pg4 = Classe4("dante alighieri", 56)
     
     println("${pg1.nome} ha ${pg1.eta} anni")
     println("${pg2.nomeCognome} ha ${pg2.eta} anni")
     println("${pg3.nomeCognome} ha ${pg3.eta} anni")
+    println("${pg4.nome} e' morto a ${pg4.anniVissuti} anni")
 }
  
 // constructor primario
@@ -28,6 +30,25 @@ class Classe3(nC: String, secoli: Int){
     var eta = secoli * 100
 }
 
+// Classe4 e Vita contengono due constructor secondari
+open class Classe4 {
+    var nome: String
+    var anniVissuti = 0
+    constructor(_nome: String) {
+        nome = _nome
+    }
+    constructor(_nome: String, _anniVissuti: Int) {
+        nome = _nome
+        anniVissuti = _anniVissuti
+}}
+
+// nel caso in cui non ci sia un costruttore primario ogni classe base deve iniziallizare la base() usando 'super'
+// o delegare un altro costruttore che lo faccia per lei
+class Vita : Classe4 {
+    constructor(_nome: String) : this("From AuthLog -> $_nome", 10)
+    constructor(_nome: String, _anniVissuti: Int) : super(_nome, _anniVissuti)
+}
+
 // // constructor secondari servono per espandere le classi (check kotlin inheritance) e probabilmente non mi sevira'
 // class Log {
 //     constructor(data: String){
@@ -44,26 +65,4 @@ class Classe3(nC: String, secoli: Int){
 //     constructor(data: String, numberOfData: Int): super(data, numberOfData){
 //         // codice
 //     }
-// }
-
-// nel caso in cui non ci sia un costruttore primario ogni classe base deve iniziallizare la base usando 'super'
-// o delegare un altro costruttore che lo faccia per lei
-// fun main(args: Array<String>) {
-//     val p1 = AuthLog("Bad Password")
-// }
-// open class Log {
-//     var data: String
-//     var numberOfData = 0
-//     constructor(_data: String) {
-//         data = _data
-//     }
-//     constructor(_data: String, _numberOfData: Int) {
-//         data = _data
-//         numberOfData = _numberOfData
-//         println("$data: $numberOfData times")
-//     }
-// }
-// class AuthLog : Log {
-//     constructor(_data: String) : this("From AuthLog -> $_data", 10)
-//     constructor(_data: String, _numberOfData: Int) : super(_data, _numberOfData)
 // }
