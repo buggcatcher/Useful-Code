@@ -37,7 +37,6 @@ class Classe3(nC: String, secoli: Int){
 //         // codice
 //     }
 // }
-
 // class AuthLog: Log {
 //     constructor(data: String): super(data){
 //         // codice
@@ -45,4 +44,26 @@ class Classe3(nC: String, secoli: Int){
 //     constructor(data: String, numberOfData: Int): super(data, numberOfData){
 //         // codice
 //     }
+// }
+
+// nel caso in cui non ci sia un costruttore primario ogni classe base deve iniziallizare la base usando 'super'
+// o delegare un altro costruttore che lo faccia per lei
+// fun main(args: Array<String>) {
+//     val p1 = AuthLog("Bad Password")
+// }
+// open class Log {
+//     var data: String
+//     var numberOfData = 0
+//     constructor(_data: String) {
+//         data = _data
+//     }
+//     constructor(_data: String, _numberOfData: Int) {
+//         data = _data
+//         numberOfData = _numberOfData
+//         println("$data: $numberOfData times")
+//     }
+// }
+// class AuthLog : Log {
+//     constructor(_data: String) : this("From AuthLog -> $_data", 10)
+//     constructor(_data: String, _numberOfData: Int) : super(_data, _numberOfData)
 // }
