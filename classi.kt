@@ -45,7 +45,7 @@ open class Classe4 {
 // nel caso in cui non ci sia un costruttore primario ogni classe base deve iniziallizare la base() usando 'super'
 // o delegare un altro costruttore che lo faccia per lei
 class Vita : Classe4 {
-    constructor(_nome: String) : this("From AuthLog -> $_nome", 10)
+    constructor(_nome: String) : this("ignavo", 10)
     constructor(_nome: String, _anniVissuti: Int) : super(_nome, _anniVissuti)
 }
 
