@@ -1,11 +1,11 @@
-let hh, clap, bass; //hi-hat
-let masterPat, hPat, cPat, bPat, timePat; //hihat patern. array of numbers to manipulate the beats
-let hPhrase, cPhrase, bPhrase; // defines how hihat pattern is interpreted
-let drums; //part. we will attach the phrase to part, which wil lserve as our transport to drive the phrase
-let bpmSlide;
-let beatLength;
-let cnv;
-let cursorP;
+let hh, clap, bass; //instruments
+let masterPat, hPat, cPat, bPat, timePat; //patterns; where its decided when the sound will play
+let hPhrase, cPhrase, bPhrase; //phrases; where the patterns are attached to the sound
+let drums; //part or partiture; where the phrases are added together
+let bpmSlide; //slider to change the bpm
+let beatLength; //length of the bar (so 16 is 16 notes in a loop)
+let cnv; //canvas
+let cursorP; //cursor position
 
 
 function setup() {
@@ -47,8 +47,8 @@ function setup() {
 
 function draw() {
 	background(80);
-	// console.log('x')
 	dots();
+	beatTracker();
 }
 
 // stop and play the loop with space bar
@@ -117,9 +117,12 @@ function ft_bass() {
 
 // function that follows the beat of the sequence
 function sequence(time, beatIndex) {
-	stroke('red');
-	console.log(beatIndex);
-	rect(beatIndex*, 0 , length / beatLength, height);
+	// stroke('red');
+	// fill('red');
+	setTimeout(() => {
+		console.log(beatIndex);
+		cursorP = beatIndex - 1;
+	}, time * 1000);
 }
 
 // function that draws the dots and the grid
@@ -133,6 +136,7 @@ function dots() {
 		line(0, (i * height) / 3, width, (i * height) / 3);
 	}
 	noStroke();
+	fill('gray');
 	for (let j = 1; j < 4; j++) {
 		for (let i = 0; i < beatLength; i++) {
 			if (masterPat[j][i] === 1)
@@ -143,6 +147,13 @@ function dots() {
 				);
 		}
 	}
+}
+
+// function that draws the red cursor
+function beatTracker() {
+	stroke('red');
+	fill(255,0,0,30);
+	rect(cursorP * (width / beatLength), 0 , width / beatLength, height);
 }
 
 // function to resume audio context - needed for web browsers to play audio, since they block it by default
