@@ -3,53 +3,71 @@ let recordedChunks = [];
 let audioContext = null;
 let audioSource = null;
 let renderedBuffer = null;
-
-document.getElementById('recordButton').addEventListener('click', function() {
-    document.getElementById('uploadButton').style.display = 'none'; // Nasconde il pulsante Carica Audio
-    document.getElementById('recordButton').style.display = 'none'; // Nasconde il pulsante Registra Audio
-    document.getElementById('stopButton').style.display = 'block'; // Mostra il pulsante Stop Audio
-
-    startRecording();
-});
-
-document.getElementById('uploadButton').addEventListener('click', function() {
-    document.getElementById('recordOptions').style.display = 'none'; // Nasconde i pulsanti Registra Audio e Carica Audio
-    document.getElementById('audioInput').click(); // Apre il file manager per caricare un file audio
-});
-
-document.getElementById('audioInput').addEventListener('change', function() {
-    const file = this.files[0];
-    if (file) {
-        startFileAudio(file);
-    }
-});
-
-document.getElementById('stopButton').addEventListener('click', function() {
-    if (mediaRecorder && mediaRecorder.state === 'recording') {
-        mediaRecorder.stop();
-        this.style.display = 'none'; // Nasconde il pulsante Stop Audio
-        document.getElementById('recordButton').style.display = 'block'; // Mostra di nuovo il pulsante Registra Audio
-        document.getElementById('uploadButton').style.display = 'block'; // Mostra di nuovo il pulsante Carica Audio
-    }
-});
-
-document.getElementById('processButton').addEventListener('click', function() {
-    const effectIntensity = document.getElementById('gainSlider').value / 100;
-    const maxEffectIntensity = 0.75;
-    const finalEffectIntensity = Math.min(effectIntensity, maxEffectIntensity);
-
-    if (audioContext && audioSource && renderedBuffer) {
-        applyEffect(finalEffectIntensity);
-    } else {
-        alert("Carica o registra un file audio prima di applicare l'effetto.");
-    }
-});
-
-document.getElementById('gainSlider').addEventListener('input', function() {
-    document.getElementById('gainValue').innerText = this.value;
-});
+let audioPreviewUrl = null; // Salva l'URL dell'anteprima audio corrente
 
 document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('recordButton').addEventListener('click', function() {
+        document.getElementById('uploadButton').style.display = 'none';
+        document.getElementById('recordButton').style.display = 'none';
+        document.getElementById('stopButton').style.display = 'inline-block';
+        startRecording();
+    });
+
+    document.getElementById('stopButton').addEventListener('click', function() {
+        if (mediaRecorder && mediaRecorder.state === 'recording') {
+            mediaRecorder.stop();
+            this.style.display = 'none';
+            document.getElementById('recordButton').style.display = 'inline-block';
+            document.getElementById('uploadButton').style.display = 'inline-block';
+        }
+    });
+
+    document.getElementById('uploadButton').addEventListener('click', function() {
+        // Nascondi solo l'input file per evitare di selezionare un file audio duplicato
+        document.getElementById('audioInput').style.display = 'inline-block';
+
+        // Mostra l'input file per il caricamento
+        document.getElementById('audioInput').click();
+    });
+
+    document.getElementById('audioInput').addEventListener('change', function() {
+        const file = this.files[0];
+        if (file) {
+            // Nascondi solo l'input file dopo aver selezionato un file audio
+            this.style.display = 'none';
+
+            // Resetta i dati del file audio precedente
+            resetAudioData();
+
+            startFileAudio(file);
+        }
+    });
+
+    document.getElementById('processButton').addEventListener('click', function() {
+        const effectIntensity = document.getElementById('gainSlider').value / 100;
+        const maxEffectIntensity = 0.75;
+        const finalEffectIntensity = Math.min(effectIntensity, maxEffectIntensity);
+
+        if (audioContext && audioSource && renderedBuffer) {
+            applyEffect(finalEffectIntensity);
+        } else {
+            alert("Carica o registra un file audio prima di applicare l'effetto.");
+        }
+    });
+
+    document.getElementById('gainSlider').addEventListener('input', function() {
+        document.getElementById('gainValue').innerText = this.value;
+
+        // Se abbiamo già un'anteprima audio, applica l'effetto anche al nuovo valore dello slider
+        if (audioPreviewUrl) {
+            const effectIntensity = this.value / 100;
+            const maxEffectIntensity = 0.75;
+            const finalEffectIntensity = Math.min(effectIntensity, maxEffectIntensity);
+
+            applyEffect(finalEffectIntensity);
+        }
+    });
+
     document.getElementById('gainValue').innerText = document.getElementById('gainSlider').value;
 });
 
@@ -65,6 +83,7 @@ function startRecording() {
             mediaRecorder.onstop = function() {
                 const blob = new Blob(recordedChunks, { type: 'audio/webm' });
                 const url = URL.createObjectURL(blob);
+                audioPreviewUrl = url; // Save the URL of the preview audio
 
                 const audioPreview = document.getElementById('audioPreview');
                 audioPreview.src = url;
@@ -76,7 +95,36 @@ function startRecording() {
                 downloadLink.style.display = 'block';
                 downloadLink.innerText = 'Scarica Audio Registrato';
 
-                // Resetta l'array di chunk registrati
+                // Convert the recorded audio blob to AudioBuffer
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    audioContext.decodeAudioData(event.target.result, function(buffer) {
+                        if (audioSource) {
+                            audioSource.stop();
+                        }
+
+                        audioSource = audioContext.createBufferSource();
+                        audioSource.buffer = buffer;
+
+                        const gainNode = audioContext.createGain();
+                        gainNode.gain.value = 1; // No effect initially
+
+                        audioSource.connect(gainNode);
+                        gainNode.connect(audioContext.destination);
+
+                        renderedBuffer = buffer; // Assign the rendered buffer
+
+                        // Apply the robot effect (you can adjust intensity as needed)
+                        applyEffect(0.5); // Example intensity
+
+                        // Update preview and download links
+                        updatePreviewAndDownload();
+                    });
+                };
+                reader.readAsArrayBuffer(blob);
+
+                // Reset the array of recorded chunks
                 recordedChunks = [];
             };
 
@@ -86,6 +134,7 @@ function startRecording() {
             console.error('Errore durante l\'accesso al microfono: ' + err);
         });
 }
+
 
 function startFileAudio(file) {
     const reader = new FileReader();
@@ -158,6 +207,7 @@ function updatePreviewAndDownload() {
     if (renderedBuffer) {
         const blob = bufferToWave(renderedBuffer, renderedBuffer.length);
         const url = URL.createObjectURL(blob);
+        audioPreviewUrl = url; // Salva l'URL dell'anteprima audio
 
         const audioPreview = document.getElementById('audioPreview');
         audioPreview.src = url;
@@ -169,6 +219,21 @@ function updatePreviewAndDownload() {
         downloadLink.style.display = 'block';
         downloadLink.innerText = 'Scarica Audio Modificato';
     }
+}
+
+function resetAudioData() {
+    audioContext = null;
+    audioSource = null;
+    renderedBuffer = null;
+    audioPreviewUrl = null; // Resetta l'URL dell'anteprima audio
+
+    const audioPreview = document.getElementById('audioPreview');
+    audioPreview.src = '';
+    audioPreview.controls = false;
+
+    const downloadLink = document.getElementById('downloadLink');
+    downloadLink.href = '';
+    downloadLink.style.display = 'none';
 }
 
 function bufferToWave(abuffer, len) {
