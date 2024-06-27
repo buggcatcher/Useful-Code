@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modifica Audio Robotico</title>
+</head>
+<body>
+    <h1>Modifica Audio Robotico</h1>
+    
+    <!-- Opzione per registrare audio -->
+    <div id="recordOptions">
+        <button id="recordButton">Registra Audio</button>
+        <button id="uploadButton">Carica Audio</button>
+    </div>
+
+    <!-- Input file nascosto per il caricamento -->
+    <input type="file" id="audioInput" accept="audio/*" style="display:none;">
+    <br><br>
+
+    <!-- Slider per impostare l'intensità dell'effetto robotico -->
+    <label for="gainSlider">Imposta Intensità Effetto Robotico: </label>
+    <input type="range" id="gainSlider" min="0" max="100" value="50">
+    <span id="gainValue">50</span>%
+    <br><br>
+
+    <!-- Pulsante per applicare l'effetto robotico -->
+    <button id="processButton">Applica Effetto Robot</button>
+    <br><br>
+
+    <!-- Preview dell'audio modificato -->
+    <audio id="audioPreview" controls></audio>
+    <br><br>
+
+    <!-- Link per scaricare l'audio modificato -->
+    <a id="downloadLink" style="display:none;">Scarica Audio Modificato</a>
+
+    <!-- Pulsante per interrompere la registrazione -->
+    <button id="stopButton" style="display:none;">Stop Audio</button>
+
+    <script src="script.js"></script>
+</body>
+</html>
