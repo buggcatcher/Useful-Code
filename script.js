@@ -6,70 +6,71 @@ let renderedBuffer = null;
 let audioPreviewUrl = null; // Salva l'URL dell'anteprima audio corrente
 
 document.addEventListener('DOMContentLoaded', function() {
-    document.getElementById('recordButton').addEventListener('click', function() {
-        document.getElementById('uploadButton').style.display = 'none';
-        document.getElementById('recordButton').style.display = 'none';
-        document.getElementById('stopButton').style.display = 'inline-block';
-        startRecording();
-    });
-
-    document.getElementById('stopButton').addEventListener('click', function() {
-        if (mediaRecorder && mediaRecorder.state === 'recording') {
-            mediaRecorder.stop();
-            this.style.display = 'none';
-            document.getElementById('recordButton').style.display = 'inline-block';
-            document.getElementById('uploadButton').style.display = 'inline-block';
-        }
-    });
-
-    document.getElementById('uploadButton').addEventListener('click', function() {
-        // Nascondi solo l'input file per evitare di selezionare un file audio duplicato
-        document.getElementById('audioInput').style.display = 'inline-block';
-
-        // Mostra l'input file per il caricamento
-        document.getElementById('audioInput').click();
-    });
-
-    document.getElementById('audioInput').addEventListener('change', function() {
-        const file = this.files[0];
-        if (file) {
-            // Nascondi solo l'input file dopo aver selezionato un file audio
-            this.style.display = 'none';
-
-            // Resetta i dati del file audio precedente
-            resetAudioData();
-
-            startFileAudio(file);
-        }
-    });
-
-    document.getElementById('processButton').addEventListener('click', function() {
-        const effectIntensity = document.getElementById('gainSlider').value / 100;
-        const maxEffectIntensity = 0.75;
-        const finalEffectIntensity = Math.min(effectIntensity, maxEffectIntensity);
-
-        if (audioContext && audioSource && renderedBuffer) {
-            applyEffect(finalEffectIntensity);
-        } else {
-            alert("Carica o registra un file audio prima di applicare l'effetto.");
-        }
-    });
-
-    document.getElementById('gainSlider').addEventListener('input', function() {
-        document.getElementById('gainValue').innerText = this.value;
-
-        // Se abbiamo già un'anteprima audio, applica l'effetto anche al nuovo valore dello slider
-        if (audioPreviewUrl) {
-            const effectIntensity = this.value / 100;
-            const maxEffectIntensity = 0.75;
-            const finalEffectIntensity = Math.min(effectIntensity, maxEffectIntensity);
-
-            applyEffect(finalEffectIntensity);
-        }
-    });
-
+    setupEventListeners();
     document.getElementById('gainValue').innerText = document.getElementById('gainSlider').value;
 });
+
+function setupEventListeners() {
+    document.getElementById('recordButton').addEventListener('click', startRecordingHandler);
+    document.getElementById('stopButton').addEventListener('click', stopRecordingHandler);
+    document.getElementById('uploadButton').addEventListener('click', uploadAudioHandler);
+    document.getElementById('audioInput').addEventListener('change', audioInputChangeHandler);
+    document.getElementById('processButton').addEventListener('click', processAudioHandler);
+    document.getElementById('gainSlider').addEventListener('input', gainSliderInputHandler);
+}
+
+function startRecordingHandler() {
+    document.getElementById('uploadButton').style.display = 'none';
+    document.getElementById('recordButton').style.display = 'none';
+    document.getElementById('stopButton').style.display = 'inline-block';
+    startRecording();
+}
+
+function stopRecordingHandler() {
+    if (mediaRecorder && mediaRecorder.state === 'recording') {
+        mediaRecorder.stop();
+        this.style.display = 'none';
+        document.getElementById('recordButton').style.display = 'inline-block';
+        document.getElementById('uploadButton').style.display = 'inline-block';
+    }
+}
+
+function uploadAudioHandler() {
+    document.getElementById('audioInput').style.display = 'inline-block';
+    document.getElementById('audioInput').click();
+}
+
+function audioInputChangeHandler() {
+    const file = this.files[0];
+    if (file) {
+        this.style.display = 'none';
+        resetAudioData();
+        startFileAudio(file);
+    }
+}
+
+function processAudioHandler() {
+    const effectIntensity = document.getElementById('gainSlider').value / 100;
+    const maxEffectIntensity = 0.75;
+    const finalEffectIntensity = Math.min(effectIntensity, maxEffectIntensity);
+
+    if (audioContext && audioSource && renderedBuffer) {
+        applyEffect(finalEffectIntensity);
+    } else {
+        alert("Carica o registra un file audio prima di applicare l'effetto.");
+    }
+}
+
+function gainSliderInputHandler() {
+    document.getElementById('gainValue').innerText = this.value;
+
+    if (audioPreviewUrl) {
+        const effectIntensity = this.value / 100;
+        const maxEffectIntensity = 0.75;
+        const finalEffectIntensity = Math.min(effectIntensity, maxEffectIntensity);
+        applyEffect(finalEffectIntensity);
+    }
+}
 
 function startRecording() {
     navigator.mediaDevices.getUserMedia({ audio: true })
@@ -85,46 +86,8 @@ function startRecording() {
                 const url = URL.createObjectURL(blob);
                 audioPreviewUrl = url; // Save the URL of the preview audio
 
-                const audioPreview = document.getElementById('audioPreview');
-                audioPreview.src = url;
-                audioPreview.controls = true;
-
-                const downloadLink = document.getElementById('downloadLink');
-                downloadLink.href = url;
-                downloadLink.download = 'audio_registrato.webm';
-                downloadLink.style.display = 'block';
-                downloadLink.innerText = 'Scarica Audio Registrato';
-
-                // Convert the recorded audio blob to AudioBuffer
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                    audioContext.decodeAudioData(event.target.result, function(buffer) {
-                        if (audioSource) {
-                            audioSource.stop();
-                        }
-
-                        audioSource = audioContext.createBufferSource();
-                        audioSource.buffer = buffer;
-
-                        const gainNode = audioContext.createGain();
-                        gainNode.gain.value = 1; // No effect initially
-
-                        audioSource.connect(gainNode);
-                        gainNode.connect(audioContext.destination);
-
-                        renderedBuffer = buffer; // Assign the rendered buffer
-
-                        // Apply the robot effect (you can adjust intensity as needed)
-                        applyEffect(0.5); // Example intensity
-
-                        // Update preview and download links
-                        updatePreviewAndDownload();
-                    });
-                };
-                reader.readAsArrayBuffer(blob);
-
-                // Reset the array of recorded chunks
+                updatePreviewAndDownload(url, 'audio_registrato.webm', 'Scarica Audio Registrato');
+                convertBlobToAudioBuffer(blob);
                 recordedChunks = [];
             };
 
@@ -135,41 +98,10 @@ function startRecording() {
         });
 }
 
-
 function startFileAudio(file) {
     const reader = new FileReader();
     reader.onload = function(event) {
-        audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        audioContext.decodeAudioData(event.target.result, function(buffer) {
-            if (audioSource) {
-                audioSource.stop();
-            }
-
-            audioSource = audioContext.createBufferSource();
-            audioSource.buffer = buffer;
-
-            const gainNode = audioContext.createGain();
-            gainNode.gain.value = 1; // Nessun effetto applicato inizialmente
-
-            audioSource.connect(gainNode);
-            gainNode.connect(audioContext.destination);
-
-            const offlineContext = new OfflineAudioContext(1, buffer.length, buffer.sampleRate);
-            const offlineSource = offlineContext.createBufferSource();
-            offlineSource.buffer = buffer;
-
-            const offlineGainNode = offlineContext.createGain();
-            offlineGainNode.gain.value = 1;
-
-            offlineSource.connect(offlineGainNode);
-            offlineGainNode.connect(offlineContext.destination);
-
-            offlineSource.start(0);
-            offlineContext.startRendering().then(function(newBuffer) {
-                renderedBuffer = newBuffer;
-                updatePreviewAndDownload();
-            });
-        });
+        createAudioContext(event.target.result);
     };
     reader.readAsArrayBuffer(file);
 }
@@ -203,21 +135,23 @@ function applyEffect(intensity) {
     });
 }
 
-function updatePreviewAndDownload() {
-    if (renderedBuffer) {
+function updatePreviewAndDownload(url = null, filename = 'audio_modificato.wav', linkText = 'Scarica Audio Modificato') {
+    if (!url && renderedBuffer) {
         const blob = bufferToWave(renderedBuffer, renderedBuffer.length);
-        const url = URL.createObjectURL(blob);
-        audioPreviewUrl = url; // Salva l'URL dell'anteprima audio
+        url = URL.createObjectURL(blob);
+        audioPreviewUrl = url;
+    }
 
+    if (url) {
         const audioPreview = document.getElementById('audioPreview');
         audioPreview.src = url;
         audioPreview.controls = true;
 
         const downloadLink = document.getElementById('downloadLink');
         downloadLink.href = url;
-        downloadLink.download = 'audio_modificato.wav';
+        downloadLink.download = filename;
         downloadLink.style.display = 'block';
-        downloadLink.innerText = 'Scarica Audio Modificato';
+        downloadLink.innerText = linkText;
     }
 }
 
@@ -225,7 +159,7 @@ function resetAudioData() {
     audioContext = null;
     audioSource = null;
     renderedBuffer = null;
-    audioPreviewUrl = null; // Resetta l'URL dell'anteprima audio
+    audioPreviewUrl = null;
 
     const audioPreview = document.getElementById('audioPreview');
     audioPreview.src = '';
@@ -272,8 +206,9 @@ function bufferToWave(abuffer, len) {
     setUint32(0x61746164); // "data" - chunk
     setUint32(length - pos - 4); // chunk length
 
-    for (i = 0; i < abuffer.numberOfChannels; i++)
+    for (i = 0; i < abuffer.numberOfChannels; i++) {
         channels.push(abuffer.getChannelData(i));
+    }
 
     while (pos < length) {
         for (i = 0; i < numOfChan; i++) {
@@ -286,4 +221,64 @@ function bufferToWave(abuffer, len) {
     }
 
     return new Blob([buffer], { type: "audio/wav" });
+}
+
+function convertBlobToAudioBuffer(blob) {
+    const reader = new FileReader();
+    reader.onload = function(event) {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        audioContext.decodeAudioData(event.target.result, function(buffer) {
+            if (audioSource) {
+                audioSource.stop();
+            }
+
+            audioSource = audioContext.createBufferSource();
+            audioSource.buffer = buffer;
+
+            const gainNode = audioContext.createGain();
+            gainNode.gain.value = 1;
+
+            audioSource.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+
+            renderedBuffer = buffer;
+            applyEffect(0.5);
+            updatePreviewAndDownload();
+        });
+    };
+    reader.readAsArrayBuffer(blob);
+}
+
+function createAudioContext(arrayBuffer) {
+    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    audioContext.decodeAudioData(arrayBuffer, function(buffer) {
+        if (audioSource) {
+            audioSource.stop();
+        }
+
+        audioSource = audioContext.createBufferSource();
+        audioSource.buffer = buffer;
+
+        const gainNode = audioContext.createGain();
+        gainNode.gain.value = 1;
+
+        audioSource.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+
+        const offlineContext = new OfflineAudioContext(1, buffer.length, buffer.sampleRate);
+        const offlineSource = offlineContext.createBufferSource();
+        offlineSource.buffer = buffer;
+
+        const offlineGainNode = offlineContext.createGain();
+        offlineGainNode.gain.value = 1;
+
+        offlineSource.connect(offlineGainNode);
+        offlineGainNode.connect(offlineContext.destination);
+
+        offlineSource.start(0);
+        offlineContext.startRendering().then(function(newBuffer) {
+            renderedBuffer = newBuffer;
+            updatePreviewAndDownload();
+        });
+    });
 }
