@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Photo Gallery</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+    h1 {
+      margin-bottom: 20px;
+    }
+    .gallery {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+    }
+    .gallery img {
+      width: 200px;
+      height: 200px;
+      object-fit: cover;
+      border-radius: 10px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+  </style>
+</head>
+<body>
+  <h1>Photo Gallery</h1>
+  <div class="gallery" id="gallery"></div>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      var markers = JSON.parse(localStorage.getItem('markers')) || [];
+
+      // Iterate over markers and display relevant photos or data
+      markers.forEach(function(marker, index) {
+        const img = document.createElement('img');
+        // Example: Displaying placeholder images
+        img.src = `https://via.placeholder.com/200?text=Marker${index+1}`;
+        img.alt = `Marker ${index+1}`;
+        document.getElementById('gallery').appendChild(img);
+      });
+    });
+  </script>
+</body>
+</html>
