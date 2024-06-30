@@ -1,0 +1,32 @@
+#map {
+  height: 90vh;
+}
+
+#addPhotoButton {
+  z-index: 1000;
+  color: #fff;
+  cursor: pointer;
+  background-color: #007bff;
+  border: none;
+  border-radius: 5px;
+  margin-top: 25px;
+  margin-left: 50px;
+  padding: 10px 20px;
+  font-size: 16px;
+  transition: background-color .3s, transform .3s;
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  box-shadow: 0 2px 4px #0003;
+}
+
+#addPhotoButton:hover {
+  background-color: #0056b3;
+  transform: scale(1.05);
+}
+
+#addPhotoButton:active {
+  background-color: #004494;
+  transform: scale(.95);
+}
+/*# sourceMappingURL=index.3a01df49.css.map */
